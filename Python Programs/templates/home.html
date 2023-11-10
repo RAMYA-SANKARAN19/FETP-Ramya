@@ -1,20 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        #outputDiv {
+            color: black;
+        }
+        
+    </style>
 </head>
+
 <body>
     {% if session %}
     <p><img src="{{session.userinfo.picture}}" alt="Profile Pic Displayed"></p>
-    <span>Hello {{session.userinfo.name}}</span> [<span><a href="{{url_for('logout')}}">Sign Out</a></span>]
+    <span>Hello {{session.userinfo.name}}</span> <span><a style="text-decoration:none;color:#260890;"
+            href="{{url_for('logout')}}"><b>[Sign Out]</b></a></span>
     <p>You are signed in with the email {{session.userinfo.email}}</p>
     <p>Time:{{datetime.hour}}:{{datetime.minute}}:{{datetime.second}}</p>
-    <!-- <div><pre>{{pretty}}</pre>
-    </div> -->
+
+    <form id="myForm" method="POST">
+        <label for="numberInput">Number of Lines:</label>
+        <input type="number" id="numberInput" min="1" max="100" onchange="checkInputValue()">
+        <button type="button" onclick="performLogic()">Display</button>
+    </form>
+
+    <div id="outputDiv"></div>
+    <script>
+        function checkInputValue() {
+            var numberValue = document.getElementById('numberInput');
+            var num = numberValue.value;
+
+            if (num < 1 || num > 100) {
+                alert("Please enter a number between 1 and 100.");
+                numberValue.value = ""; // Clear the input field
+            }
+        }
+    </script>
+    <script>
+        async function performLogic() {
+            const numberValue = document.getElementById('numberInput').value;
+            const formData = {
+                number: numberValue
+            };
+
+            const result = await fetch('http://127.0.0.1:5000/perform_logic', {
+                method: 'post',
+                body: JSON.stringify(formData)
+            });
+
+            const response = await result.json();
+            const outputDiv = document.getElementById('outputDiv');
+            outputDiv.innerHTML = '';
+            for (let i = 0; i < response.length; i++) {
+                outputDiv.innerHTML += response[i];
+            }
+        }
+    </script>
     {% else %}
-    <p><a href="{{url_for('googleLogin')}}">Sign in Via Gmail</a></p>
+    <p><button><a style="text-decoration:none" href="{{url_for('googleLogin')}}">Sign in Via Gmail</a></button></p>
     {% endif %}
 </body>
+
 </html>
